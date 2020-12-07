@@ -1,30 +1,32 @@
 const CustomError = require("../extensions/custom-error");
 
-let intermediate_chain = [];
+let intermediateChain = [];
 
 const chainMaker = {
   getLength() {
-    return intermediate_chain.length;
+    return intermediateChain.length;
   },
   addLink(value='') {
-    intermediate_chain.push("( " + value +" )");
+    intermediateChain.push("( " + value +" )");
     return chainMaker;
   },
   removeLink(position) {
-    if(isNaN(position) || position<0 || position>chainMaker.getLength()-1) {
-      intermediate_chain = []; // clear the chain if position incorrect
-      throw CustomError('Incorrect position!')}
-    intermediate_chain.splice(position-1, 1);
+    if(isNaN(position) || position<0 || position>chainMaker.getLength()-1)
+    {
+      intermediateChain = []; // clear the chain if position incorrect
+      throw CustomError('Incorrect position!');
+    }
+    intermediateChain.splice(position-1, 1);
     return chainMaker;
   },
   reverseChain() {
-    intermediate_chain.reverse();
+    intermediateChain.reverse();
     return chainMaker;
   },
   finishChain() {
-    let finalize_chain_value = intermediate_chain.join("~~");
-    intermediate_chain = []; // clear the chain after finishing the chain
-    return finalize_chain_value;
+    let finishChainValue = intermediateChain.join('~~');
+    intermediateChain = []; // clear the chain after finishing the chain
+    return finishChainValue;
   }
 
 };
