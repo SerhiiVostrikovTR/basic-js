@@ -1,41 +1,27 @@
 const CustomError = require("../extensions/custom-error");
 
 module.exports = function getSeason(userDate) {
-  if (typeof(userDate) === 'undefined' || userDate === null)
+
+  const winter = 'winter';
+  const spring = 'spring';
+  const summer = 'summer';
+  const fall = 'fall';
+
+  if (typeof userDate === 'undefined' || userDate === null)
   {
     return 'Unable to determine the time of year!';
   }
-  if (this.toString.call(userDate) === '[object Date]')
+
+  if (this.toString.call(userDate) !== '[object Date]' || isNaN(userDate.getTime()))
   {
-    if (isNaN(userDate.getTime()))
-    {
-      throw CustomError(userDate + 'is not date format');
-    }
-  }
-  else
-    {
-      throw CustomError('Unable to determine the time of year!');
+    throw CustomError('Error');
   }
 
-  let month = userDate.getMonth();
-  let winter = 'winter';
-  let spring = 'spring';
-  let summer = 'summer';
-  let fall = 'fall';
-  let seasons = {
-    '12':winter,
-    '1': winter,
-    '2': winter,
-    '3': spring,
-    '4': spring,
-    '5': spring,
-    '6': summer,
-    '7': summer,
-    '8': summer,
-    '9': fall,
-    '10': fall,
-    '11': fall
-  };
-  return seasons[(month+1).toString()];
-};
+  switch (userDate.getMonth()+1){
+    case 12: case 1: case 2: return winter;
+    case 3: case 4: case 5: return spring;
+    case 6: case 7: case 8: return summer;
+    case 10: case 11: case 9: return fall;
+  }
+}
 
