@@ -1,51 +1,40 @@
 const CustomError = require("../extensions/custom-error");
 
-const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+
 
 class VigenereCipheringMachine {
-
   constructor(directMachine=true) {
     this.directMachine = directMachine;
   }
 
+  ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+  getAlphabetValueByIndex = index => this.ALPHABET[index];
+  getAlphabetIndexByValue = value => this.ALPHABET.indexOf(value);
+  secretWordMultiple = (stringToModify, secretKey) => {return secretKey.repeat((stringToModify.length/secretKey.length)+1).substring(0,stringToModify.length-1)}
+
   commonEncryptDecryptSteps(stringToModify, secretKey, encrypt=true){
     let modifiedStringArray = [];
     let secretKeyIndexCounter = 0;
-    const alphabetLength = ALPHABET.length;
-    const getAlphabetValueByIndex = index => ALPHABET[index];
-    const getAlphabetIndexByValue = value => ALPHABET.indexOf(value);
-
+    const alphabetLength = this.ALPHABET.length;
+    const secretNew = this.secretWordMultiple(stringToModify, secretKey)
     stringToModify = stringToModify.toUpperCase();
     secretKey = secretKey.toUpperCase();
 
     for(let i=0; i<stringToModify.length; i++){
       let modifiedChar = stringToModify[i];
-      // Skip symbol in encryption/decryption if it isn't in alphabet
-      if(!ALPHABET.includes(stringToModify[i]))
-      {
-        modifiedStringArray.push(modifiedChar);
-      }
-      else {
-        let currentCharFromString = stringToModify.charAt(i);
-        let currentIndexFromCharOfStringInAlphabet =  getAlphabetIndexByValue(currentCharFromString);
-        let currentCharFromSecretString = secretKey.charAt(secretKeyIndexCounter % secretKey.length);
-        let currentIndexFromCharOfSecretWordInAlphabet = getAlphabetIndexByValue(currentCharFromSecretString);
-        if (encrypt){
-          // calculate encrypted char according to Vigenere's cipher
-          modifiedChar = getAlphabetValueByIndex((currentIndexFromCharOfStringInAlphabet +
-              currentIndexFromCharOfSecretWordInAlphabet) % alphabetLength);}
-        else {
-          // calculate decrypted char according to Vigenere's cipher
-          modifiedChar =
-              getAlphabetValueByIndex((currentIndexFromCharOfStringInAlphabet -
-                      currentIndexFromCharOfSecretWordInAlphabet + alphabetLength) % alphabetLength);}
+      if(this.ALPHABET.includes(stringToModify[i])) {
+        // let currentCharFromString = stringToModify.charAt(i);
+        let currentIndexFromCharOfStringInAlphabet = this.getAlphabetIndexByValue(stringToModify.charAt(i));
+        // let currentCharFromSecretString = secretKey.charAt(secretKeyIndexCounter % secretKey.length);
+        let currentIndexFromCharOfSecretWordInAlphabet = this.getAlphabetIndexByValue(secretKey.charAt(secretKeyIndexCounter % secretKey.length));
+        modifiedChar = encrypt ? this.getAlphabetValueByIndex((currentIndexFromCharOfStringInAlphabet +
+            currentIndexFromCharOfSecretWordInAlphabet) % alphabetLength) : this.getAlphabetValueByIndex((currentIndexFromCharOfStringInAlphabet -
+            currentIndexFromCharOfSecretWordInAlphabet + alphabetLength) % alphabetLength);
         secretKeyIndexCounter++;
-
-        modifiedStringArray.push(modifiedChar);
       }
+      modifiedStringArray.push(modifiedChar);
     }
     return modifiedStringArray;
-
   }
 
   encrypt(stringToEncrypt, secretKey) {
@@ -61,3 +50,13 @@ class VigenereCipheringMachine {
 }
 
 module.exports = VigenereCipheringMachine;
+
+
+
+a = new VigenereCipheringMachine();
+console.log(a.encrypt('attack at dawn!', 'alphonse'))
+
+// console.log(repeater(null, { repeatTimes: 3, separator: '??? ', addition: null, additionRepeatTimes: 3, additionSeparator: '!!!' }))
+// 'nullnull!!!null!!!null??? nullnull!!!null!!!null??? nullnull!!!null!!!null');
+// console.log(repeater('la', { repeatTimes: 3 }))
+// 'la+la+la')
