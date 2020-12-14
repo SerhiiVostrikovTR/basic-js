@@ -1,44 +1,45 @@
 const CustomError = require("../extensions/custom-error");
 
 module.exports = function transform(arrayToBeTransformed) {
-  if(!Array.isArray(arrayToBeTransformed)){
-    throw new CustomError('It is not array!');
+  if(arrayToBeTransformed.isArray){
+    throw CustomError('It is not array!');
   }
-  let result_array = arrayToBeTransformed;
-
-  for (let i=0; i<arrayToBeTransformed.length; i++){
-    if(typeof(arrayToBeTransformed[i]) == 'string'){
-      switch(arrayToBeTransformed[i]){
-        case '--discard-prev':
-          result_array.splice(i,1);
-          if(i!==0){
-            result_array.splice(i-1,1);}
-          break;
-        case '--discard-next':
-          if(i!==arrayToBeTransformed.length-1){
-            result_array.splice(i+1,1);
-          }
-          result_array.splice(i,1);
-          break;
-        case '--double-next':
-          if(i!==arrayToBeTransformed.length-1){
-            result_array.splice(i, 1, arrayToBeTransformed[i+1]);
-          }
-          else {
-            result_array.splice(i,1);
-          }
-          break;
-        case '--double-prev':
-          if(i!==0){
-            result_array.splice(i, 1, arrayToBeTransformed[i-1]);
-          }
-          else {
-            result_array.splice(i,1);
-          }
-          break;
-
+  let skipElement = false;
+  const actions = {
+    '--discard-prev': (currentArray, indexInitialArray, initialArray) => {
+      if (currentArray.length > 0 && initialArray[indexInitialArray - 2] !== '--discard-next'){
+        currentArray.pop();
       }
+      return currentArray;
+    },
+    '--discard-next': (currentArray, indexInitialArray, initialArray) => {
+      if (indexInitialArray < initialArray.length){
+        skipElement = true;
+      }
+      return currentArray;
+    },
+    '--double-next': (currentArray, indexInitialArray, initialArray) => {
+      if (indexInitialArray + 1 > initialArray.length - 1){
+        return currentArray;
+      }
+      return [...currentArray, initialArray[indexInitialArray + 1]];
+    },
+    '--double-prev': (currentArray, indexInitialArray, initialArray) => {
+      if (indexInitialArray===0 || initialArray[indexInitialArray - 2] === "--discard-next"){
+        return currentArray;
+      }
+      return [...currentArray, initialArray[indexInitialArray - 1]];
     }
-  }
-  return result_array
+  };
+
+  return arrayToBeTransformed.reduce((acc, item, index, arr) => {
+    if (skipElement) {
+      skipElement = false;
+      return acc;
+    }
+    if (Object.keys(actions).includes(item)){
+      return actions[item](acc, index, arr);
+    }
+    return [...acc, item];
+  }, []);
 };
